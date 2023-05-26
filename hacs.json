@@ -1,4 +1,5 @@
 {
     "name": "SurveyJs Form Card",
-    "render_readme": true
+    "render_readme": true,
+    "filename": "survey-js-form-card.js"
 }
