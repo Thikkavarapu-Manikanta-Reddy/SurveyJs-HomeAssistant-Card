@@ -139,6 +139,9 @@ class SurveyCard extends LitElement {
           thank_you_element.onclick = function () {
             window.location.href = "/";
           };
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2000);
         });
     });
 
