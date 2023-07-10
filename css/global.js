@@ -1,6 +1,4 @@
-import { css } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
-
-export const globalStyles = css`
+const globalStyles = `
   .sd-element__num {
     display: none;
   }
@@ -10,4 +8,15 @@ export const globalStyles = css`
   .sd-element--with-frame {
     padding: 5px !important;
   }
+  .sv-string-viewer {
+    position: relative;
+    font-size: 18px !important;
+  }
+  img {
+    position: absolute;
+    left: -23px;
+    top: 2px;
+  }
 `;
+
+export default globalStyles;

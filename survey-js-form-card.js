@@ -4,8 +4,6 @@ import {
 } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
 import "https://unpkg.com/nouislider/dist/nouislider.min.js";
 import "https://unpkg.com/jquery";
-import { nouisliderStyles } from "./css/nouislider.js";
-import { globalStyles } from "./css/global.js";
 
 class SurveyCard extends LitElement {
   static get properties() {
@@ -21,6 +19,8 @@ class SurveyCard extends LitElement {
     this.survey_timer = null;
     this.survey_state = "";
     this.customCss = "";
+    this.noUiSliderStyles = "";
+    this.globalCss = "";
     this.getCustomCss();
 
     setTimeout(() => {
@@ -60,16 +60,41 @@ class SurveyCard extends LitElement {
       ).done((script, textStatus) => {
         console.log("Survey JS Widgets loaded");
       });
+      $.getScript(
+        "https://cdnjs.cloudflare.com/ajax/libs/showdown/1.6.4/showdown.min.js"
+      ).done((script, textStatus) => {
+        console.log("Showdown loaded");
+      });
     });
   }
 
   async getCustomCss() {
     const customCss = this.config?.customCss;
-    if (customCss) {
+    const noUiSliderStyles = this.config?.noUiSliderStyles;
+    const globalCss = this.config?.globalCss;
+    if (customCss && noUiSliderStyles && globalCss) {
       this.customCss = await import(this.config?.customCss);
-      let style = this.shadowRoot.createElement("style");
-      style.innerHTML = this.customCss?.default;
-      this.shadowRoot.prepend(style);
+      this.noUiSliderStyles = await import(this.config?.noUiSliderStyles);
+      this.globalCss = await import(this.config?.globalCss);
+
+      console.log(
+        this.customCss?.default,
+        this.noUiSliderStyles?.default,
+        this.globalCss?.default
+      );
+
+      let prependStyle = this.shadowRoot.createElement("style");
+
+      let appendStyle = this.shadowRoot.createElement("style");
+
+      prependStyle.innerHTML = this.customCss?.default;
+
+      this.shadowRoot.prepend(prependStyle);
+
+      appendStyle.innerHTML =
+        this.noUiSliderStyles?.default + " " + this.globalCss?.default;
+
+      this.shadowRoot.append(appendStyle);
     }
   }
 
@@ -224,12 +249,24 @@ class SurveyCard extends LitElement {
   cssClassUpdation(classes, classKey, classValue, questionType) {
     console.log(classes, classKey, classValue, questionType, "Classes");
     classKey.forEach((v, i) => {
-      if (questionType == "rating" && v == "title") {
-        classes[v] = classes[v].replace("sd-question__title", classValue[i]);
-      } else {
-        classes[v] = classValue[i];
-      }
+      classes[v] = classValue[i];
     });
+
+    setTimeout(() => {
+      var converter = new showdown.Converter();
+      this.survey.onTextMarkdown.add(function (survey, options) {
+        //convert the markdown text to html
+
+        console.log(options, options.html);
+
+        var str = converter.makeHtml(options.text);
+        //remove root paragraphs <p></p>
+        str = str.substring(3);
+        str = str.substring(0, str.length - 4);
+        //set html
+        options.html = str;
+      });
+    }, 1);
   }
 
   render() {
@@ -244,11 +281,6 @@ class SurveyCard extends LitElement {
       />
       <div id="surveyElement"></div>
     `;
-  }
-
-  static get styles() {
-    console.log(this.config);
-    return [nouisliderStyles, globalStyles];
   }
 }
 
